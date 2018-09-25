@@ -75,6 +75,12 @@ Reader.create = util.Buffer
 
 Reader.prototype._slice = util.Array.prototype.subarray || /* istanbul ignore next */ util.Array.prototype.slice;
 
+
+/**
+ * Set string coding type.
+ */
+Reader.string_coding_type = "utf-8";
+
 /**
  * Reads a varint as an unsigned 32 bit value.
  * @function
@@ -320,8 +326,12 @@ Reader.prototype.bytes = function read_bytes() {
  */
 Reader.prototype.string = function read_string() {
     var bytes = this.bytes();
-    // return utf8.read(bytes, 0, bytes.length);
-    return gbk.decode(bytes);
+    if(Reader.string_coding_type == "gbk"){
+        return gbk.decode(bytes);
+    }
+    else{
+        return utf8.read(bytes, 0, bytes.length);
+    }
 };
 
 /**

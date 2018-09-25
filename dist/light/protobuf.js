@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled tue, 25 sep 2018 09:31:48 utc
+ * compiled tue, 25 sep 2018 13:43:32 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -1110,7 +1110,7 @@ utf8.write = function utf8_write(string, buffer, offset) {
 
 },{}],11:[function(require,module,exports){
 /*!
- * cz-gbk.js v0.1.2
+ * cz-gbk.js v0.1.4
  * Homepage https://github.com/jianguankun/GBK.js
  * License MIT
  */
@@ -1153,6 +1153,13 @@ utf8.write = function utf8_write(string, buffer, offset) {
 					}
 				}
 				return gbk;
+			},
+			write: function (str, buffer, offset) {
+				var code = gbk.encode(str);
+				for(var i = 0; i < code.length; ++i){
+					buffer[offset++] = code[i];
+				}
+				return code.length;
 			},
 			length: function (str) {
 				str += '';
@@ -1747,7 +1754,7 @@ function encoder(mtype) {
     /* eslint-disable no-unexpected-multiline, block-scoped-var, no-redeclare */
     var gen = util.codegen(["m", "w"], mtype.name + "$encode")
     ("if(!w)")
-        ("w=Writer.create()");
+        ("w=Writer.create()")
 
     var i, ref;
 
@@ -3857,6 +3864,12 @@ Reader.create = util.Buffer
 
 Reader.prototype._slice = util.Array.prototype.subarray || /* istanbul ignore next */ util.Array.prototype.slice;
 
+
+/**
+ * Set string coding type.
+ */
+Reader.string_coding_type = "utf-8";
+
 /**
  * Reads a varint as an unsigned 32 bit value.
  * @function
@@ -4102,8 +4115,12 @@ Reader.prototype.bytes = function read_bytes() {
  */
 Reader.prototype.string = function read_string() {
     var bytes = this.bytes();
-    // return utf8.read(bytes, 0, bytes.length);
-    return gbk.decode(bytes);
+    if(Reader.string_coding_type == "gbk"){
+        return gbk.decode(bytes);
+    }
+    else{
+        return utf8.read(bytes, 0, bytes.length);
+    }
 };
 
 /**
@@ -5399,12 +5416,12 @@ Type.prototype.setup = function setup() {
     this.encode = encoder(this)({
         Writer : Writer,
         types  : types,
-        util   : util
+        util   : util,
     });
     this.decode = decoder(this)({
         Reader : Reader,
         types  : types,
-        util   : util
+        util   : util,
     });
     this.verify = verifier(this)({
         types : types,
@@ -6813,6 +6830,7 @@ wrappers[".google.protobuf.Any"] = {
 module.exports = Writer;
 
 var util      = require(37);
+var gbk      = require(12);
 
 var BufferWriter; // cyclic
 
@@ -6956,6 +6974,11 @@ Writer.create = util.Buffer
 Writer.alloc = function alloc(size) {
     return new util.Array(size);
 };
+
+/**
+ * Set string coding type.
+ */
+Writer.string_coding_type = "utf-8";
 
 // Use Uint8Array buffer pool in the browser, just like node does with buffers
 /* istanbul ignore else */
@@ -7196,10 +7219,18 @@ Writer.prototype.bytes = function write_bytes(value) {
  * @returns {Writer} `this`
  */
 Writer.prototype.string = function write_string(value) {
-    var len = utf8.length(value);
+    var encoder;
+    if(Writer.string_coding_type == "gbk"){
+        encoder = gbk;
+    }
+    else{
+        encoder = utf8;
+    }
+    var len = encoder.length(value);
     return len
-        ? this.uint32(len)._push(utf8.write, len, value)
+        ? this.uint32(len)._push(encoder.write, len, value)
         : this._push(writeByte, 1, 0);
+    
 };
 
 /**
@@ -7211,6 +7242,7 @@ Writer.prototype.fork = function fork() {
     this.states = new State(this);
     this.head = this.tail = new Op(noop, 0, 0);
     this.len = 0;
+    this.params = {};
     return this;
 };
 
@@ -7227,6 +7259,7 @@ Writer.prototype.reset = function reset() {
     } else {
         this.head = this.tail = new Op(noop, 0, 0);
         this.len  = 0;
+        this.params = {};
     }
     return this;
 };
@@ -7269,7 +7302,7 @@ Writer._configure = function(BufferWriter_) {
     BufferWriter = BufferWriter_;
 };
 
-},{"37":37}],41:[function(require,module,exports){
+},{"12":12,"37":37}],41:[function(require,module,exports){
 "use strict";
 module.exports = BufferWriter;
 

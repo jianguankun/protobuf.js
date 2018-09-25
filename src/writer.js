@@ -2,6 +2,7 @@
 module.exports = Writer;
 
 var util      = require("./util/minimal");
+var gbk      = require("cz-gbk.js");
 
 var BufferWriter; // cyclic
 
@@ -145,6 +146,11 @@ Writer.create = util.Buffer
 Writer.alloc = function alloc(size) {
     return new util.Array(size);
 };
+
+/**
+ * Set string coding type.
+ */
+Writer.string_coding_type = "utf-8";
 
 // Use Uint8Array buffer pool in the browser, just like node does with buffers
 /* istanbul ignore else */
@@ -385,10 +391,18 @@ Writer.prototype.bytes = function write_bytes(value) {
  * @returns {Writer} `this`
  */
 Writer.prototype.string = function write_string(value) {
-    var len = utf8.length(value);
+    var encoder;
+    if(Writer.string_coding_type == "gbk"){
+        encoder = gbk;
+    }
+    else{
+        encoder = utf8;
+    }
+    var len = encoder.length(value);
     return len
-        ? this.uint32(len)._push(utf8.write, len, value)
+        ? this.uint32(len)._push(encoder.write, len, value)
         : this._push(writeByte, 1, 0);
+    
 };
 
 /**
@@ -400,6 +414,7 @@ Writer.prototype.fork = function fork() {
     this.states = new State(this);
     this.head = this.tail = new Op(noop, 0, 0);
     this.len = 0;
+    this.params = {};
     return this;
 };
 
@@ -416,6 +431,7 @@ Writer.prototype.reset = function reset() {
     } else {
         this.head = this.tail = new Op(noop, 0, 0);
         this.len  = 0;
+        this.params = {};
     }
     return this;
 };

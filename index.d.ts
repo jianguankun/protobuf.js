@@ -1082,6 +1082,9 @@ export class Reader {
     /** Read buffer length. */
     public len: number;
 
+    /** String coding type. "utf-8" default*/
+    public static string_coding_type: string;
+
     /**
      * Creates a new reader using the specified buffer.
      * @param buffer Buffer to read from
@@ -2469,6 +2472,9 @@ export class Writer {
 
     /** Linked forked states. */
     public states: (object|null);
+
+    /** String coding type. "utf-8" default*/
+    public static string_coding_type: string;
 
     /**
      * Creates a new writer.
