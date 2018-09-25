@@ -2,6 +2,7 @@
 module.exports = Reader;
 
 var util      = require("./util/minimal");
+var gbk       = require("cz-gbk.js");
 
 var BufferReader; // cyclic
 
@@ -319,7 +320,8 @@ Reader.prototype.bytes = function read_bytes() {
  */
 Reader.prototype.string = function read_string() {
     var bytes = this.bytes();
-    return utf8.read(bytes, 0, bytes.length);
+    // return utf8.read(bytes, 0, bytes.length);
+    return gbk.decode(bytes);
 };
 
 /**
