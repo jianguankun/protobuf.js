@@ -1083,7 +1083,7 @@ export class Reader {
     public len: number;
 
     /** String coding type. "utf-8" default*/
-    public static string_coding_type: string;
+    public string_coding_type: string;
 
     /**
      * Creates a new reader using the specified buffer.
@@ -2474,7 +2474,7 @@ export class Writer {
     public states: (object|null);
 
     /** String coding type. "utf-8" default*/
-    public static string_coding_type: string;
+    public string_coding_type: string;
 
     /**
      * Creates a new writer.

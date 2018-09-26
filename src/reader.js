@@ -39,6 +39,11 @@ function Reader(buffer) {
      * @type {number}
      */
     this.len = buffer.length;
+
+    /**
+     * Set string coding type.
+     */
+    this.string_coding_type = "utf-8";
 }
 
 var create_array = typeof Uint8Array !== "undefined"
@@ -74,12 +79,6 @@ Reader.create = util.Buffer
     : create_array;
 
 Reader.prototype._slice = util.Array.prototype.subarray || /* istanbul ignore next */ util.Array.prototype.slice;
-
-
-/**
- * Set string coding type.
- */
-Reader.string_coding_type = "utf-8";
 
 /**
  * Reads a varint as an unsigned 32 bit value.
@@ -326,7 +325,7 @@ Reader.prototype.bytes = function read_bytes() {
  */
 Reader.prototype.string = function read_string() {
     var bytes = this.bytes();
-    if(Reader.string_coding_type == "gbk"){
+    if(this.string_coding_type == "gbk"){
         return gbk.decode(bytes);
     }
     else{

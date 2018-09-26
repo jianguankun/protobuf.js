@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled tue, 25 sep 2018 13:43:32 utc
+ * compiled wed, 26 sep 2018 02:45:50 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -2155,7 +2155,7 @@ function encoder(mtype) {
     /* eslint-disable no-unexpected-multiline, block-scoped-var, no-redeclare */
     var gen = util.codegen(["m", "w"], mtype.name + "$encode")
     ("if(!w)")
-        ("w=Writer.create()")
+        ("w=Writer.create()");
 
     var i, ref;
 
@@ -5003,6 +5003,11 @@ function Reader(buffer) {
      * @type {number}
      */
     this.len = buffer.length;
+
+    /**
+     * Set string coding type.
+     */
+    this.string_coding_type = "utf-8";
 }
 
 var create_array = typeof Uint8Array !== "undefined"
@@ -5038,12 +5043,6 @@ Reader.create = util.Buffer
     : create_array;
 
 Reader.prototype._slice = util.Array.prototype.subarray || /* istanbul ignore next */ util.Array.prototype.slice;
-
-
-/**
- * Set string coding type.
- */
-Reader.string_coding_type = "utf-8";
 
 /**
  * Reads a varint as an unsigned 32 bit value.
@@ -5290,7 +5289,7 @@ Reader.prototype.bytes = function read_bytes() {
  */
 Reader.prototype.string = function read_string() {
     var bytes = this.bytes();
-    if(Reader.string_coding_type == "gbk"){
+    if(this.string_coding_type == "gbk"){
         return gbk.decode(bytes);
     }
     else{
@@ -6990,12 +6989,12 @@ Type.prototype.setup = function setup() {
     this.encode = encoder(this)({
         Writer : Writer,
         types  : types,
-        util   : util,
+        util   : util
     });
     this.decode = decoder(this)({
         Reader : Reader,
         types  : types,
-        util   : util,
+        util   : util
     });
     this.verify = verifier(this)({
         types : types,
@@ -8517,6 +8516,11 @@ function Writer() {
      */
     this.states = null;
 
+    /**
+     * Set string coding type.
+     */
+    this.string_coding_type = "utf-8";
+
     // When a value is written, the writer calculates its byte length and puts it into a linked
     // list of operations to perform when finish() is called. This both allows us to allocate
     // buffers of the exact required size and reduces the amount of work we have to do compared
@@ -8548,11 +8552,6 @@ Writer.create = util.Buffer
 Writer.alloc = function alloc(size) {
     return new util.Array(size);
 };
-
-/**
- * Set string coding type.
- */
-Writer.string_coding_type = "utf-8";
 
 // Use Uint8Array buffer pool in the browser, just like node does with buffers
 /* istanbul ignore else */
@@ -8794,7 +8793,7 @@ Writer.prototype.bytes = function write_bytes(value) {
  */
 Writer.prototype.string = function write_string(value) {
     var encoder;
-    if(Writer.string_coding_type == "gbk"){
+    if(this.string_coding_type == "gbk"){
         encoder = gbk;
     }
     else{
@@ -8833,7 +8832,6 @@ Writer.prototype.reset = function reset() {
     } else {
         this.head = this.tail = new Op(noop, 0, 0);
         this.len  = 0;
-        this.params = {};
     }
     return this;
 };

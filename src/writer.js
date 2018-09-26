@@ -115,6 +115,11 @@ function Writer() {
      */
     this.states = null;
 
+    /**
+     * Set string coding type.
+     */
+    this.string_coding_type = "utf-8";
+
     // When a value is written, the writer calculates its byte length and puts it into a linked
     // list of operations to perform when finish() is called. This both allows us to allocate
     // buffers of the exact required size and reduces the amount of work we have to do compared
@@ -146,11 +151,6 @@ Writer.create = util.Buffer
 Writer.alloc = function alloc(size) {
     return new util.Array(size);
 };
-
-/**
- * Set string coding type.
- */
-Writer.string_coding_type = "utf-8";
 
 // Use Uint8Array buffer pool in the browser, just like node does with buffers
 /* istanbul ignore else */
@@ -392,7 +392,7 @@ Writer.prototype.bytes = function write_bytes(value) {
  */
 Writer.prototype.string = function write_string(value) {
     var encoder;
-    if(Writer.string_coding_type == "gbk"){
+    if(this.string_coding_type == "gbk"){
         encoder = gbk;
     }
     else{
@@ -431,7 +431,6 @@ Writer.prototype.reset = function reset() {
     } else {
         this.head = this.tail = new Op(noop, 0, 0);
         this.len  = 0;
-        this.params = {};
     }
     return this;
 };
